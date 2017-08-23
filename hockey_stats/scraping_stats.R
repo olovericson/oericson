@@ -14,7 +14,5 @@ team_data <- read_html(stats_link("/ScheduleAndResults/Overview/8121")) %>%
   get_link_and_text() %>% 
   filter(str_detect(name, "^\\d") & name != "2017-18") %>% 
   mutate(overview_link = sapply(link, get_overview_link)) %>% 
-  mutate(standings_link = str_replace(overview_link, "Overview", "Standings")) %>% 
   rowwise() %>% 
   do(get_team_data(.["overview_link"], .["name"]))
-
