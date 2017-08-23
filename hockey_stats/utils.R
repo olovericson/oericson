@@ -1,10 +1,4 @@
-get_team_stats <- function(input_nodes){
-  input_nodes %>% 
-    html_nodes("td") %>% 
-    html_text() %>% 
-    str_replace_all("[\n\r]", "")
-}
-
+# Utilities ---------------------------------------------------------------
 char_is_numeric <- function(x){
   all(!is.na(as.numeric(x)))
 }
@@ -20,6 +14,14 @@ get_link_and_text <- function(.){
   html_nodes(., "a") %>% 
     tibble(name = html_text(.), link = html_attr(., "href")) %>% 
     select(-.)
+}
+
+# Specific stats-scraping -------------------------------------------------
+get_team_stats <- function(input_nodes){
+  input_nodes %>% 
+    html_nodes("td") %>% 
+    html_text() %>% 
+    str_replace_all("[\n\r]", "")
 }
 
 get_overview_link <- function(link) {
