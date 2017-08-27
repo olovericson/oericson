@@ -16,6 +16,12 @@ get_link_and_text <- function(.){
     select(-.)
 }
 
+
+add_names_from_first_row <- function(data){
+  names(data) <- data %>% head(1) %>% str_trim()
+  tail(data, -1)
+}
+
 # Specific ep-scraping -------------------------------------------------
 ep_link <- link_concat("http://www.eliteprospects.com/")
 ep_season_link = link_concat(ep_link("league_home.php?leagueid=1&startdate="))
@@ -33,11 +39,8 @@ get_ep_season_data <- function(season){
     mutate(TEAM = str_trim(name)) %>% 
     select(-name)
   
-  league_data <- html_table(league_table) 
-  names(league_data) <- league_data %>% head(1) %>% str_trim()
-  
-  league_data %>% 
-    tail(-1) %>% 
+  html_table(league_table) %>%
+    add_names_from_first_row() %>%
     mutate_if(char_is_numeric, as.numeric) %>% 
     inner_join(team_links) %>% 
     mutate(season = season)
