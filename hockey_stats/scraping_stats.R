@@ -1,18 +1,19 @@
 library(rvest)
 library(stringr)
 library(dplyr)
-library(purrr)
+library(magrittr)
 
 setwd("C:/Users/olov_/git_repo/oericson/hockey_stats")
 source("utils.R")
 
-stats_link <-link_concat("http://stats.swehockey.se")
+ep_link <- link_concat("http://www.eliteprospects.com/")
+ep_league_link = link_concat(ep_link("league_home.php?leagueid=1&startdate="))
 
-team_data <- read_html(stats_link("/ScheduleAndResults/Overview/8121")) %>% 
-  html_node('#menuUl') %>% 
-  html_nodes("li") %>% 
-  get_link_and_text() %>% 
-  filter(str_detect(name, "^\\d") & name != "2017-18") %>% 
-  mutate(overview_link = sapply(link, get_overview_link)) %>% 
-  rowwise() %>% 
-  do(get_team_data(.["overview_link"], .["name"]))
+seasons <- 2010:2016
+
+ep_season_data <- map_df(seasons, get_ep_season_data)
+
+
+
+
+
