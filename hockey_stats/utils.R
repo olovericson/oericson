@@ -46,4 +46,31 @@ get_ep_season_data <- function(season){
     mutate(season = season)
 }
 
-
+get_ep_season_transfers <- function(team, season){
+  transfer_nodes <- read_html(paste0(ep_link("transfer.php?team="), team, "&filter=", season)) %>% 
+    html_nodes("#ads-fullpage-site") %>%  
+    html_nodes(".tableborder") %>% 
+    extract2(1) 
+  
+  transfer_links <- transfer_nodes %>% 
+    get_link_and_text() %>% 
+    filter(name != "") %>% 
+    mutate(
+      player = ifelse(0 == (row_number() %% 2), lag(name), name),
+      team = ifelse(0 == (row_number() %% 2), name, lead(name))
+    ) %>% 
+    group_by(player, team) %>% 
+    summarise(player_link = min(link), team_link = max(link)) %>% 
+    ungroup() %>% 
+    mutate_all(function(x) str_trim(x, side="both"))
+  
+  transfer_nodes %>% 
+    html_table() %>% 
+    add_names_from_first_row() %>%
+    select(-1, -SOURCE) %>% 
+    filter(PLAYER != "Loans joining") %>%  
+    tidyr::separate(PLAYER, c("date", "name"), "\\|") %>% 
+    mutate_all(str_trim) %>% 
+    left_join(transfer_links, by = c("name" = "player", "FROM" = "team")) %>% 
+    mutate(type = "to", season = season, team = team)
+}

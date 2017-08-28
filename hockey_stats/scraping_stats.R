@@ -13,22 +13,16 @@ ep_link <- link_concat("http://www.eliteprospects.com/")
 
 seasons <- 2010:2016
 
-ep_season_data <- map_df(seasons, get_ep_season_data) 
+ep_season_data <- purrr::map_df(seasons, get_ep_season_data) 
 
 #Could be used below
 ep_season_data$team_no <- str_extract(ep_season_data$link, "\\d+")
+team_numbers <- unique(ep_season_data$team_no)
 
-#Transfers    
-read_html("http://www.eliteprospects.com/transfer.php?team=5&filter=2016") %>% 
-  html_nodes("#ads-fullpage-site") %>%  
-  html_nodes(".tableborder") %>% 
-  extract2(1) %>% 
-  html_table() %>% 
-  add_names_from_first_row() %>%
-  select(-1, -SOURCE) %>% 
-  filter(PLAYER != "Loans joining") %>%  
-  tidyr::separate(PLAYER, c("date", "sep","name"), " | ", extra = "merge") %>% 
-  select(-sep)
+team <- team_numbers[1]
+season <- seasons[1]
+
+transfers <- purrr::map2_df(ep_season_data$team_no, ep_season_data$season, get_ep_season_transfers)
 
 
 
